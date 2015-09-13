@@ -33,12 +33,16 @@ The final product will include and iOS app to set the time, date, and alarms.
 
 ## Setting Date and Time ##
 
-### Setting the date ###
-
-'d(YY-MM-DD)'
+### Date ###
 
 
-### Who do I talk to? ###
+```
+d(YY-MM-DD)
+```
 
-* Repo owner or admin
-* Other community or team contact
+
+### Time ###
+
+```
+t(HR-MIN-SEC)
+```
