@@ -9,6 +9,8 @@
 
 // create shift register object (number of shift registers, data pin, clock pin, latch pin)
 ShiftRegister74HC595 sr (1, 2, 3, 4); 
+ShiftRegister74HC595 srM (1, 5, 6, 7);
+
 int delayTime = 1000;
 
 void setup() { 
@@ -17,9 +19,13 @@ void setup() {
 void loop() {
   TurnOnR9();
   TurnOnL9();
+  TurnOnML1();
+  TurnOnMR1();
   delay(delayTime);
   TurnOffL();
   TurnOffR();
+  TurnOffML();
+  TurnOffMR();
   delay(delayTime);
   
 }
@@ -159,4 +165,144 @@ sr.set(4, HIGH);
 sr.set(5, LOW);
 sr.set(6, LOW);
 sr.set(7, HIGH);
+}
+
+
+
+
+///////////////////////////seconds///////////////////////////////
+/////////////L.//////////////////////
+void TurnOffMR(){
+srM.set(0, HIGH);
+srM.set(1, HIGH);
+srM.set(2, HIGH);
+srM.set(3, HIGH);
+}
+void TurnOnMR1(){
+srM.set(0, LOW);
+srM.set(1, LOW);
+srM.set(2, LOW);
+srM.set(3, LOW);
+}
+void TurnOnMR0(){
+srM.set(0, HIGH); 
+srM.set(1, LOW);
+srM.set(2, LOW);
+srM.set(3, LOW);
+}
+void TurnOnMR9(){
+srM.set(0, LOW);
+srM.set(1, HIGH);
+srM.set(2, LOW);
+srM.set(3, LOW);
+}
+void TurnOnMR8(){
+srM.set(0, HIGH);
+srM.set(1, HIGH);
+srM.set(2, LOW);
+srM.set(3, LOW);
+}
+void TurnOnMR7(){
+srM.set(0, LOW);
+srM.set(1, LOW);
+srM.set(2, HIGH);
+srM.set(3, LOW);
+}
+void TurnOnMR6(){
+srM.set(0, HIGH);
+srM.set(1, LOW);
+srM.set(2, HIGH);
+srM.set(3, LOW);
+}
+void TurnOnMR5(){
+srM.set(0, LOW);
+srM.set(1, HIGH);
+srM.set(2, HIGH);
+srM.set(3, LOW);
+}
+void TurnOnMR4(){
+srM.set(0, HIGH);
+srM.set(1, HIGH);
+srM.set(2, HIGH);
+srM.set(3, LOW);
+}
+void TurnOnMR3(){
+srM.set(0, LOW);
+srM.set(1, LOW);
+srM.set(2, LOW);
+srM.set(3, HIGH);
+}
+void TurnOnMR2(){
+srM.set(0, HIGH);
+srM.set(1, LOW);
+srM.set(2, LOW);
+srM.set(3, HIGH);
+}
+
+///////////////////////R////////////////////////////
+void TurnOffML(){
+srM.set(4, HIGH);
+srM.set(5, HIGH);
+srM.set(6, HIGH);
+srM.set(7, HIGH);
+}
+void TurnOnML1(){
+srM.set(4, LOW);
+srM.set(5, LOW);
+srM.set(6, LOW);
+srM.set(7, LOW);
+}
+void TurnOnML0(){
+srM.set(4, HIGH); 
+srM.set(5, LOW);
+srM.set(6, LOW);
+srM.set(7, LOW);
+}
+void TurnOnML9(){
+srM.set(4, LOW);
+srM.set(5, HIGH);
+srM.set(6, LOW);
+srM.set(7, LOW);
+}
+void TurnOnML8(){
+srM.set(4, HIGH);
+srM.set(5, HIGH);
+srM.set(6, LOW);
+srM.set(7, LOW);
+}
+void TurnOnML7(){
+srM.set(4, LOW);
+srM.set(5, LOW);
+srM.set(6, HIGH);
+srM.set(7, LOW);
+}
+void TurnOnML6(){
+srM.set(4, HIGH);
+srM.set(5, LOW);
+srM.set(6, HIGH);
+srM.set(7, LOW);
+}
+void TurnOnML5(){
+srM.set(4, LOW);
+srM.set(5, HIGH);
+srM.set(6, HIGH);
+srM.set(7, LOW);
+}
+void TurnOnML4(){
+srM.set(4, HIGH);
+srM.set(5, HIGH);
+srM.set(6, HIGH);
+srM.set(7, LOW);
+}
+void TurnOnML3(){
+srM.set(4, LOW);
+srM.set(5, LOW);
+srM.set(6, LOW);
+srM.set(7, HIGH);
+}
+void TurnOnML2(){
+srM.set(4, HIGH);
+srM.set(5, LOW);
+srM.set(6, LOW);
+srM.set(7, HIGH);
 }
