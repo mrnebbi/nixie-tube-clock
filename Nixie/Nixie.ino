@@ -7,7 +7,17 @@
   // create shift register object (number of shift registers, data pin, clock pin, latch pin)
   ShiftRegister74HC595 ShiftHrs (1, 4, 5, 6); 
   ShiftRegister74HC595 ShiftMins (1, 6, 7, 8);
+
+  // clock stuff. these are needed for the DS3231 module.
+  #include <DS3231.h>
+  #include <Wire.h>  // I2C
+
+  DS3231 Clock;
+
+  bool h12;
+  bool PM;
   
+
   int delayTime = 1000;
   int shortDelayTime = 150;
   int pinSet = 0;
@@ -37,25 +47,30 @@
   
   const int setButton = 2;
   const int addButton = 3;
+  const int fetchDuration = 300; // every X seconds
   
   int mode = 0;
   int countHr = 0;
   int countMin = 0;
+  bool setTimeNextLoop = false; // Issuing I2C commands during the interrupt function seems to cause a crash. This provides a workaround.
   
   bool blinkState = false;
-  unsigned long time_now = 0; // Interrupt timer for debouncing
+  unsigned long previousMillis = 0; // Interrupt timer for debouncing
 
+  // time keeping
+  int currentTimeHr = 0;
+  int currentTimeMin = 0;
+  int currentTimeSec = 0;
+  int fetchCount = 0;
 
 /*
  * Setup function
  */
 
-void setup() {
-  
+void setup() {  
   // put your setup code here, to run once:
   pinMode(setButton, INPUT_PULLUP);
   pinMode(addButton, INPUT_PULLUP);
-
 
   Serial.begin(115200);
   Serial.println("Start");
@@ -63,17 +78,135 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(setButton),setButtonPress,FALLING);
   attachInterrupt(digitalPinToInterrupt(addButton),addButtonPress,FALLING);
 
+  Wire.begin();
+
+  Clock.setClockMode(false);  // set to 24h
+
+  currentTimeHr = Clock.getHour(h12, PM);
+  currentTimeMin = Clock.getMinute();
+  currentTimeSec = Clock.getSecond();
+  
+  
+  Serial.print(currentTimeHr, DEC); //24-hr
+  Serial.print(":");
+  Serial.print(currentTimeMin, DEC);
+  Serial.print(":");
+  Serial.println(currentTimeSec, DEC);
+
 }
 
 void loop() {
-  if (mode == 0) {
-    showTime();
+  
+  // these functions run once every second
+  
+  if(millis() - previousMillis > 1000) {
+    previousMillis = millis();
+    fetchCount = fetchCount + 1;
+    
+    if (mode == 0) {
+      countTime();
+      showCurrentTime();
+    } else {
+      countTime();
+      showSetTime();
+    }
   }
-  delay(500);
+
+
+  // these function run every loop
+  
+  if (setTimeNextLoop) {
+    Clock.setClockMode(false);  // set to 24h
+    Clock.setHour(countHr);
+    Clock.setMinute(countMin);
+    Clock.setSecond(0);
+    currentTimeHr = Clock.getHour(h12, PM);
+    currentTimeMin = Clock.getMinute();
+    currentTimeSec = Clock.getSecond();
+    setTimeNextLoop = false;
+  }
+
+  if(fetchCount >= fetchDuration) {
+
+    Serial.println("Get time");
+    currentTimeHr = Clock.getHour(h12, PM);
+    currentTimeMin = Clock.getMinute();
+    currentTimeSec = Clock.getSecond();
+    fetchCount = 0;
+  }
 }
 
 
-void showTime() {
+// keep a track of the time ourselves so we don't have to poll the rtc so often
+void countTime() {
+  if (currentTimeSec == 59) {
+    currentTimeSec = 0;
+    
+    if (currentTimeMin == 59) {
+      currentTimeMin = 0;
+
+      if (currentTimeHr == 23) {
+        currentTimeHr = 0;
+      } else {
+        currentTimeHr = currentTimeHr + 1;
+      }
+      
+    } else {
+      currentTimeMin = currentTimeMin + 1;
+    }
+    
+  } else {
+    currentTimeSec = currentTimeSec + 1; 
+  }
+}
+
+
+void showCurrentTime() {
+    if (currentTimeHr < 10) {
+      Serial.print("0");
+    }
+    Serial.print(currentTimeHr);
+    Serial.print(":");
+    if (currentTimeMin < 10) {
+      Serial.print("0");
+    }
+    Serial.print(currentTimeMin);
+    Serial.print(":");
+    if (currentTimeSec < 10) {
+      Serial.print("0");
+    }
+    Serial.print(currentTimeSec);
+
+    int hr1 = (currentTimeHr / 10) % 10;
+    int hr2 = currentTimeHr % 10;
+
+    int min1 = (currentTimeMin / 10) % 10;
+    int min2 = currentTimeMin % 10;
+
+    int sec1 = (currentTimeSec / 10) % 10;
+    int sec2 = currentTimeSec % 10;
+
+    setDigit(0,hr1);
+    setDigit(1,hr2);
+    setDigit(3,min1);
+    setDigit(4,min2);
+
+    Serial.print(" (A:");
+    Serial.print(hr1);
+    Serial.print(" B:");
+    Serial.print(hr2);
+    Serial.print(" C:");
+    Serial.print(min1);
+    Serial.print(" D:");
+    Serial.print(min2);
+    Serial.print(" E:");
+    Serial.print(sec1);
+    Serial.print(" F:");
+    Serial.print(sec2);
+    Serial.println(")");
+}
+
+void showSetTime() {
     if (countHr < 10) {
       Serial.print("0");
     }
@@ -89,6 +222,11 @@ void showTime() {
 
     int min1 = (countMin / 10) % 10;
     int min2 = countMin % 10;
+
+    setDigit(0,hr1);
+    setDigit(1,hr2);
+    setDigit(3,min1);
+    setDigit(4,min2);
 
     Serial.print(" (A:");
     Serial.print(hr1);
@@ -109,7 +247,7 @@ void addHour(){
     countHr = countHr + 1;
   }
   
-  showTime();
+  showSetTime();
 }
 
 void addMin(){
@@ -120,7 +258,7 @@ void addMin(){
     countMin = countMin + 1;
   }
 
-  showTime();
+  showSetTime();
 }
 
 
@@ -128,8 +266,8 @@ void addMin(){
 
 void setButtonPress(){
 //  Serial.println("Set");
-  if(millis() > time_now + 200){
-    time_now = millis();
+  if(millis() - previousMillis > 200){
+    previousMillis = millis();
     
     if (mode > 1) {
       mode = 0;
@@ -137,26 +275,31 @@ void setButtonPress(){
       mode = mode + 1;
     }
 
-        
     switch (mode) {
       case 1:
+        countHr = currentTimeHr;
+        countMin = currentTimeMin;
           // flash hours
         break;
       case 2:
           // flash mins
         break;
       default:
-          // revert to time display
+        // revert to time display
+        setTimeNextLoop = true;
         break;
     }
+
+    Serial.print("New mode: ");
+    Serial.println(mode);
     
   }
 }
 
 void addButtonPress(){
 //  Serial.println("Add");
-  if(millis() > time_now + 200){
-    time_now = millis();
+  if(millis() - previousMillis > 200){
+    previousMillis = millis();
     if (mode == 1) {
       addHour();
     } else if (mode == 2) {
@@ -172,12 +315,12 @@ void addButtonPress(){
  */
 
 /*
- * SetDigit(position, digit)
+ * setDigit(position, digit)
  * Position: 0 & 1 = hours. 2 & 3 = minutes
  * Digit: What digit to show? 0 - 9
  */
 
-void SetDigit(int position, int digit){
+void setDigit(int position, int digit){
   if (position == 0 || position == 2) {
     pinSet = 0;
   } else {
@@ -198,12 +341,12 @@ void SetDigit(int position, int digit){
 
 
 /*
- * ClearDigit(position)
+ * clearDigit(position)
  * Clear a digit at a specific position. Shows no digit.
  * Position: 0 & 1 = hours. 2 & 3 = minutes
  */
  
-void ClearDigit(int position){
+void clearDigit(int position){
   if (position == 0 || position == 2) {
     pinSet = 0;
   } else {
@@ -222,31 +365,31 @@ void ClearDigit(int position){
 }
 
 /*
- * ClearAll()
+ * clearAll()
  * Clears all digits at once. Shows no digits.
  */
 
-void ClearAll () {
-  ClearDigit(1); // hr 1
-  ClearDigit(2); // hr 2
-  ClearDigit(3); // min 1
-  ClearDigit(4); // min 2
+void clearAll() {
+  clearDigit(1); // hr 1
+  clearDigit(2); // hr 2
+  clearDigit(3); // min 1
+  clearDigit(4); // min 2
 }
 
 /*
- * CycleTubes()
+ * cycleTubes()
  * Runs all digits through all Nixie tubes to prevent cathode poisoning
  */
 
-void CycleTubes() {
+void cycleTubes() {
   for (int x = 0; x < 10; x++) {
-    SetDigit(0,x);
-    SetDigit(1,x);
-    SetDigit(2,x);
-    SetDigit(3,x);
+    setDigit(0,x);
+    setDigit(1,x);
+    setDigit(2,x);
+    setDigit(3,x);
     delay(delayTime);
   }
-  ClearAll();
+  clearAll();
   delay(delayTime);
 }
 
