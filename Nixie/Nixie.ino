@@ -48,6 +48,7 @@
   const int setButton = 2;
   const int addButton = 3;
   const int fetchDuration = 300; // every X seconds
+  const bool cycleOnBoot = true;
   
   int mode = 0;
   int countHr = 0;
@@ -78,21 +79,14 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(setButton),setButtonPress,FALLING);
   attachInterrupt(digitalPinToInterrupt(addButton),addButtonPress,FALLING);
 
+  if (cycleOnBoot) {
+    cycleTubes();
+  }
+
   Wire.begin();
 
   Clock.setClockMode(false);  // set to 24h
-
-  currentTimeHr = Clock.getHour(h12, PM);
-  currentTimeMin = Clock.getMinute();
-  currentTimeSec = Clock.getSecond();
-  
-  
-  Serial.print(currentTimeHr, DEC); //24-hr
-  Serial.print(":");
-  Serial.print(currentTimeMin, DEC);
-  Serial.print(":");
-  Serial.println(currentTimeSec, DEC);
-
+  fetchCurrentTime();
 }
 
 void loop() {
@@ -102,12 +96,11 @@ void loop() {
   if(millis() - previousMillis > 1000) {
     previousMillis = millis();
     fetchCount = fetchCount + 1;
+    countTime();
     
     if (mode == 0) {
-      countTime();
       showCurrentTime();
     } else {
-      countTime();
       showSetTime();
     }
   }
@@ -127,11 +120,7 @@ void loop() {
   }
 
   if(fetchCount >= fetchDuration) {
-
-    Serial.println("Get time");
-    currentTimeHr = Clock.getHour(h12, PM);
-    currentTimeMin = Clock.getMinute();
-    currentTimeSec = Clock.getSecond();
+    fetchCurrentTime();
     fetchCount = 0;
   }
 }
@@ -160,6 +149,12 @@ void countTime() {
   }
 }
 
+void fetchCurrentTime() {
+  Serial.println("Get time");
+  currentTimeHr = Clock.getHour(h12, PM);
+  currentTimeMin = Clock.getMinute();
+  currentTimeSec = Clock.getSecond();
+}
 
 void showCurrentTime() {
     if (currentTimeHr < 10) {
@@ -204,6 +199,12 @@ void showCurrentTime() {
     Serial.print(" F:");
     Serial.print(sec2);
     Serial.println(")");
+
+    // Cycle tubes at midnight
+    if (currentTimeHr == 0 && currentTimeMin == 0 && currentTimeSec == 0) {
+      cycleTubes();
+      fetchCurrentTime();
+    }
 }
 
 void showSetTime() {
@@ -382,6 +383,7 @@ void clearAll() {
  */
 
 void cycleTubes() {
+  Serial.println("Cycle tubes");
   for (int x = 0; x < 10; x++) {
     setDigit(0,x);
     setDigit(1,x);
