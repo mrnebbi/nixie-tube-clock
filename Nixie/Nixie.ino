@@ -93,7 +93,7 @@ void loop() {
   
   // these functions run once every second
   
-  if(millis() - previousMillis > 1000) {
+  if ((unsigned long)(millis() - previousMillis) >= 1000) {
     previousMillis = millis();
     fetchCount = fetchCount + 1;
     countTime();
@@ -267,7 +267,7 @@ void addMin(){
 
 void setButtonPress(){
 //  Serial.println("Set");
-  if(millis() - previousMillis > 200){
+  if ((unsigned long)(millis() - previousMillis) >= 200) {
     previousMillis = millis();
     
     if (mode > 1) {
@@ -299,7 +299,7 @@ void setButtonPress(){
 
 void addButtonPress(){
 //  Serial.println("Add");
-  if(millis() - previousMillis > 200){
+  if ((unsigned long)(millis() - previousMillis) >= 200) {
     previousMillis = millis();
     if (mode == 1) {
       addHour();
