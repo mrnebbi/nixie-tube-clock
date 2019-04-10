@@ -6,7 +6,7 @@
   
   // create shift register object (number of shift registers, data pin, clock pin, latch pin)
   ShiftRegister74HC595 ShiftHrs (1, 4, 5, 6); 
-  ShiftRegister74HC595 ShiftMins (1, 6, 7, 8);
+  ShiftRegister74HC595 ShiftMins (1, 7, 8, 9);
 
   // clock stuff. these are needed for the DS3231 module.
   #include <DS3231.h>
@@ -18,7 +18,7 @@
   bool PM;
   
 
-  int delayTime = 1000;
+  int delayTime = 250;
   int shortDelayTime = 150;
   int pinSet = 0;
   
@@ -48,7 +48,7 @@
   const int setButton = 2;
   const int addButton = 3;
   const int fetchDuration = 300; // every X seconds
-  const bool cycleOnBoot = true;
+  const bool cycleOnBoot = false;
   
   int mode = 0;
   int countHr = 0;
@@ -101,7 +101,13 @@ void loop() {
     if (mode == 0) {
       showCurrentTime();
     } else {
-      showSetTime();
+      if (blinkState) {
+        clearAll();
+        blinkState = false;
+      } else {
+        showSetTime();
+        blinkState = true;
+      }
     }
   }
 
@@ -183,8 +189,8 @@ void showCurrentTime() {
 
     setDigit(0,hr1);
     setDigit(1,hr2);
-    setDigit(3,min1);
-    setDigit(4,min2);
+    setDigit(2,min1);
+    setDigit(3,min2);
 
     Serial.print(" (A:");
     Serial.print(hr1);
@@ -226,8 +232,8 @@ void showSetTime() {
 
     setDigit(0,hr1);
     setDigit(1,hr2);
-    setDigit(3,min1);
-    setDigit(4,min2);
+    setDigit(2,min1);
+    setDigit(3,min2);
 
     Serial.print(" (A:");
     Serial.print(hr1);
@@ -394,5 +400,3 @@ void cycleTubes() {
   clearAll();
   delay(delayTime);
 }
-
-
