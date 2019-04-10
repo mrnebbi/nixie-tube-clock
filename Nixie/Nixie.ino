@@ -377,10 +377,10 @@ void clearDigit(int position){
  */
 
 void clearAll() {
-  clearDigit(1); // hr 1
-  clearDigit(2); // hr 2
-  clearDigit(3); // min 1
-  clearDigit(4); // min 2
+  clearDigit(0); // hr 1
+  clearDigit(1); // hr 2
+  clearDigit(2); // min 1
+  clearDigit(3); // min 2
 }
 
 /*
