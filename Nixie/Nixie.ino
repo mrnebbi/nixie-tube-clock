@@ -134,25 +134,10 @@ void loop() {
 
 // keep a track of the time ourselves so we don't have to poll the rtc so often
 void countTime() {
-  if (currentTimeSec == 59) {
-    currentTimeSec = 0;
-    
-    if (currentTimeMin == 59) {
-      currentTimeMin = 0;
-
-      if (currentTimeHr == 23) {
-        currentTimeHr = 0;
-      } else {
-        currentTimeHr = currentTimeHr + 1;
-      }
-      
-    } else {
-      currentTimeMin = currentTimeMin + 1;
-    }
-    
-  } else {
-    currentTimeSec = currentTimeSec + 1; 
-  }
+  currentTimeSec = (currentTimeSec == 59) ? 0 : currentTimeSec + 1;
+  
+  if(currentTimeSec == 0) currentTimeMin = currentTimeMin == 59 ? 0 : currentTimeMin + 1;
+  if(currentTimeSec == 0 && currentTimeMin == 0) currentTimeHr = currentTimeHr == 23 ? 0 : currentTimeHr + 1;
 }
 
 void fetchCurrentTime() {
