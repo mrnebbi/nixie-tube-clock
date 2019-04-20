@@ -48,7 +48,7 @@
   const int setButton = 2;
   const int addButton = 3;
   const int fetchDuration = 300; // every X seconds
-  const bool cycleOnBoot = false;
+  const bool cycleOnBoot = true;
   
   int mode = 0;
   int countHr = 0;
@@ -101,13 +101,7 @@ void loop() {
     if (mode == 0) {
       showCurrentTime();
     } else {
-      if (blinkState) {
-        clearAll();
-        blinkState = false;
-      } else {
-        showSetTime();
-        blinkState = true;
-      }
+      showSetTime();
     }
   }
 
