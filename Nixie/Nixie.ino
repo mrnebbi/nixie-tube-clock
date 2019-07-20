@@ -117,6 +117,7 @@ void loop() {
     currentTimeMin = Clock.getMinute();
     currentTimeSec = Clock.getSecond();
     setTimeNextLoop = false;
+    flashTime(3);
   }
 
   if(fetchCount >= fetchDuration) {
@@ -209,11 +210,16 @@ void showSetTime() {
     int min1 = (countMin / 10) % 10;
     int min2 = countMin % 10;
 
-    setDigit(0,hr1);
-    setDigit(1,hr2);
-    setDigit(2,min1);
-    setDigit(3,min2);
+    if (mode != 2) {
+      setDigit(0,hr1);
+      setDigit(1,hr2);
+    }
 
+    if (mode != 1) {
+      setDigit(2,min1);
+      setDigit(3,min2);
+    }
+    
     Serial.print(" (A:");
     Serial.print(hr1);
     Serial.print(" B:");
@@ -266,9 +272,14 @@ void setButtonPress(){
         countHr = currentTimeHr;
         countMin = currentTimeMin;
           // flash hours
+         clearDigit(2);
+         clearDigit(3);
         break;
       case 2:
           // flash mins
+          
+         clearDigit(0);
+         clearDigit(1);
         break;
       default:
         // revert to time display
@@ -378,4 +389,13 @@ void cycleTubes() {
   }
   clearAll();
   delay(delayTime);
+}
+
+void flashTime(int count) {
+  for (int x = 0; x < count; x++) {
+    clearAll();
+    delay(500);
+    showCurrentTime();
+    delay(500);
+  }
 }
