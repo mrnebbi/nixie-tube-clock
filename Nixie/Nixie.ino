@@ -18,8 +18,9 @@
   bool PM;
   
 
-  int delayTime = 250;
-  int shortDelayTime = 150;
+  int delayTime = 2000;//250;
+  int testTime = 1000;
+  int shortDelayTime = 2000;//150;
   int pinSet = 0;
   
   boolean digits[10][4] = {
@@ -48,12 +49,15 @@
   const int setButton = 2;
   const int addButton = 3;
   const int fetchDuration = 300; // every X seconds
-  const bool cycleOnBoot = true;
+  bool cycleOnBoot = true;
+  bool tubeTestMode = false;
   
   int mode = 0;
   int countHr = 0;
   int countMin = 0;
   bool setTimeNextLoop = false; // Issuing I2C commands during the interrupt function seems to cause a crash. This provides a workaround.
+  bool beginTimeSetNextLoop = false; // Issuing I2C commands during the interrupt function seems to cause a crash. This provides a workaround.
+
   
   bool blinkState = false;
   unsigned long previousMillis = 0; // Interrupt timer for debouncing
@@ -68,17 +72,21 @@
  * Setup function
  */
 
-void setup() {  
+void setup() {
   // put your setup code here, to run once:
   pinMode(setButton, INPUT_PULLUP);
   pinMode(addButton, INPUT_PULLUP);
-
-  Serial.begin(115200);
-  Serial.println("Start");
   
   attachInterrupt(digitalPinToInterrupt(setButton),setButtonPress,FALLING);
   attachInterrupt(digitalPinToInterrupt(addButton),addButtonPress,FALLING);
 
+  Serial.begin(115200);
+  Serial.println("Start");
+
+  if (tubeTestMode) {
+    tubeTest();
+  }
+  
   if (cycleOnBoot) {
     cycleTubes();
   }
@@ -107,6 +115,16 @@ void loop() {
 
 
   // these function run every loop
+
+   if (beginTimeSetNextLoop) {
+    beginTimeSetNextLoop = false;
+    flashTime(2);
+  }
+
+  if (tubeTestMode) {
+    tubeTest();
+    tubeTestMode = false;
+  }
   
   if (setTimeNextLoop) {
     Clock.setClockMode(false);  // set to 24h
@@ -167,10 +185,10 @@ void showCurrentTime() {
     int sec1 = (currentTimeSec / 10) % 10;
     int sec2 = currentTimeSec % 10;
 
-    setDigit(0,hr1);
-    setDigit(1,hr2);
-    setDigit(2,min1);
-    setDigit(3,min2);
+    setDigit(2,hr1);
+    setDigit(3,hr2);
+    setDigit(0,min1);
+    setDigit(1,min2);
 
     Serial.print(" (A:");
     Serial.print(hr1);
@@ -187,7 +205,7 @@ void showCurrentTime() {
     Serial.println(")");
 
     // Cycle tubes at midnight
-    if (currentTimeHr == 0 && currentTimeMin == 0 && currentTimeSec == 0) {
+    if ((currentTimeHr == 0 && currentTimeMin == 0 && currentTimeSec == 0) || (currentTimeHr == 6 && currentTimeMin == 0 && currentTimeSec == 0) || (currentTimeHr == 12 && currentTimeMin == 0 && currentTimeSec == 0)) {
       cycleTubes();
       fetchCurrentTime();
     }
@@ -211,13 +229,17 @@ void showSetTime() {
     int min2 = countMin % 10;
 
     if (mode != 2) {
-      setDigit(0,hr1);
-      setDigit(1,hr2);
+      setDigit(2,hr1);
+      setDigit(3,hr2);
+      clearDigit(0);
+      clearDigit(1);
     }
 
     if (mode != 1) {
-      setDigit(2,min1);
-      setDigit(3,min2);
+      setDigit(0,min1);
+      setDigit(1,min2);
+      clearDigit(2);
+      clearDigit(3);
     }
     
     Serial.print(" (A:");
@@ -257,52 +279,51 @@ void addMin(){
 // Handle button presses and pass off to setter functions
 
 void setButtonPress(){
-//  Serial.println("Set");
-  if ((unsigned long)(millis() - previousMillis) >= 200) {
+  if ((unsigned long)(millis() - previousMillis) >= 500) {
     previousMillis = millis();
     
-    if (mode > 1) {
-      mode = 0;
+    if (digitalRead(addButton) && mode == 0) {
+      Serial.println("Test Tubes");
+      tubeTestMode = true;
     } else {
-      mode = mode + 1;
+      if (mode > 1) {
+        mode = 0;
+      } else {
+        mode = mode + 1;
+      }
+  
+      switch (mode) {
+        case 1:
+          beginTimeSetNextLoop = true;
+          countHr = currentTimeHr;
+          countMin = currentTimeMin;
+          break;
+        case 2:
+          break;
+        default:
+          // revert to time display
+          setTimeNextLoop = true;
+          break;
+      }
+  
+      Serial.print("New mode: ");
+      Serial.println(mode);
     }
-
-    switch (mode) {
-      case 1:
-        countHr = currentTimeHr;
-        countMin = currentTimeMin;
-          // flash hours
-         clearDigit(2);
-         clearDigit(3);
-        break;
-      case 2:
-          // flash mins
-          
-         clearDigit(0);
-         clearDigit(1);
-        break;
-      default:
-        // revert to time display
-        setTimeNextLoop = true;
-        break;
-    }
-
-    Serial.print("New mode: ");
-    Serial.println(mode);
-    
   }
 }
 
 void addButtonPress(){
 //  Serial.println("Add");
-  if ((unsigned long)(millis() - previousMillis) >= 200) {
-    previousMillis = millis();
-    if (mode == 1) {
-      addHour();
-    } else if (mode == 2) {
-      addMin();
+
+
+    if ((unsigned long)(millis() - previousMillis) >= 200) {
+      previousMillis = millis();
+      if (mode == 1) {
+        addHour();
+      } else if (mode == 2) {
+        addMin();
+      }
     }
-  }
 }
 
 
@@ -319,9 +340,9 @@ void addButtonPress(){
 
 void setDigit(int position, int digit){
   if (position == 0 || position == 2) {
-    pinSet = 0;
-  } else {
     pinSet = 1;
+  } else {
+    pinSet = 0;
   }
 
   if (position == 0 || position == 1) {
@@ -345,9 +366,9 @@ void setDigit(int position, int digit){
  
 void clearDigit(int position){
   if (position == 0 || position == 2) {
-    pinSet = 0;
-  } else {
     pinSet = 1;
+  } else {
+    pinSet = 0;
   }
 
   if (position == 0 || position == 1) {
@@ -390,6 +411,73 @@ void cycleTubes() {
   clearAll();
   delay(delayTime);
 }
+
+
+
+void tubeTest() {
+  clearAll();
+  Serial.println("Test tubes");
+  for (int x = 0; x < 10; x++) {
+    setDigit(0,x);
+    setDigit(1,x);
+    setDigit(2,x);
+    setDigit(3,x);
+    Serial.print("All tubes: ");
+    Serial.println(x);
+    delay(testTime);
+  }
+  Serial.println("CLEAR");
+  clearAll();
+  
+  
+  delay(testTime);
+  for (int x = 0; x < 10; x++) {
+    setDigit(1,x);
+    Serial.print("Minute 1: ");
+    Serial.println(x);
+    delay(testTime);
+  }
+  Serial.println("CLEAR");
+  clearAll();
+
+  
+  delay(testTime);
+  for (int x = 0; x < 10; x++) {
+    setDigit(0,x);
+    Serial.print("Minute 2: ");
+    Serial.println(x);
+    delay(testTime);
+  }
+  Serial.println("CLEAR");
+  clearAll();
+
+
+
+  delay(testTime);
+  for (int x = 0; x < 10; x++) {
+    setDigit(3,x);
+    Serial.print("Hour 1: ");
+    Serial.println(x);
+    delay(testTime);
+  }
+  Serial.println("CLEAR");
+  clearAll();
+  
+  delay(testTime);
+  for (int x = 0; x < 10; x++) {
+    setDigit(2,x);
+    Serial.print("Hour 2: ");
+    Serial.println(x);
+    delay(testTime);
+  }
+  Serial.println("CLEAR");
+  clearAll();
+
+
+  
+  delay(testTime);
+}
+
 
 void flashTime(int count) {
   for (int x = 0; x < count; x++) {
