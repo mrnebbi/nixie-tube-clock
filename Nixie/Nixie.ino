@@ -5,8 +5,8 @@
   #include <ShiftRegister74HC595.h>
   
   // create shift register object (number of shift registers, data pin, clock pin, latch pin)
-  ShiftRegister74HC595 ShiftHrs (1, 4, 5, 6); 
-  ShiftRegister74HC595 ShiftMins (1, 7, 8, 9);
+  ShiftRegister74HC595<1> ShiftHrs (7, 8, 9); 
+  ShiftRegister74HC595<1> ShiftMins (4, 5, 6);
 
   // clock stuff. these are needed for the DS3231 module.
   #include <DS3231.h>
@@ -351,9 +351,9 @@ void addButtonPress(){
 
 void setDigit(int position, int digit){
   if (position == 0 || position == 2) {
-    pinSet = 1;
-  } else {
     pinSet = 0;
+  } else {
+    pinSet = 1;
   }
 
   if (position == 0 || position == 1) {
@@ -377,9 +377,9 @@ void setDigit(int position, int digit){
  
 void clearDigit(int position){
   if (position == 0 || position == 2) {
-    pinSet = 1;
-  } else {
     pinSet = 0;
+  } else {
+    pinSet = 1;
   }
 
   if (position == 0 || position == 1) {
