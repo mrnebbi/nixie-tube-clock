@@ -80,6 +80,17 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(setButton),setButtonPress,FALLING);
   attachInterrupt(digitalPinToInterrupt(addButton),addButtonPress,FALLING);
 
+  /*
+   * Serial connection
+   * 
+   * RX - Grey
+   * TX - Orange
+   * RST - Yellow
+   * GND - Black
+   * 5V - Red
+   * 
+   */
+
   Serial.begin(115200);
   Serial.println("Start");
 
