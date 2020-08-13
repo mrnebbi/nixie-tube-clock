@@ -19,6 +19,8 @@ I'm using the following parts in my project:
 * 1 x High Voltage Power Supply [https://www.electroresales.com/hv-psu.html](https://www.electroresales.com/hv-psu.html)
 * 1 x DS3231 Real Time Clock Module [eBay](https://www.ebay.co.uk/sch/i.html?_from=R40&_trksid=m570.l1313&_nkw=ds3231&_sacat=0)
 * 4 x 74141 (К155ИД1) Nixie Drivers
+* 4 x IDC 14 way sockets _(for connecting tubes to mainboard)_
+* 4 x IDC 14 way plugs _(for connecting tubes to mainboard)_
 * 2 x 74HC595N Shift Registers
 * 2 x 22pF Capacitors _(for ATmega)_
 * 1 x 16MHz Crystal _(for ATmega)_
