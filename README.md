@@ -22,6 +22,11 @@ I'm using the following parts in my project:
 * 2 x 74HC595N Shift Registers
 * 2 x 22pF Capacitors
 * 1 x 16MHz Crystal
+* 1 x Stepdown switch regulator,LM2575T-5 2.2A
+* 1 x Schottky barrier diode,1N58191A 40V
+* 1 x Inductor radial ELC08D 330uH
+* 1 x Al Electrolytic Cap 105C 16V 330uF
+* 1 x M radial Al elect cap,100uF 16V 85deg C
 
 ## Todo
 
