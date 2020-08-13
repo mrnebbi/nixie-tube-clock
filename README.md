@@ -3,7 +3,7 @@
 
 ## Overview ##
 
-My Nixie Tube clock is driven by a ATMega328P (the same one MCU used in an Arduino Uno), four IN-14 Nixie Tubes, an IN-3 neon lamp, and a DS3231 RTC clock module. The tubes are powered by a high power [AC to DC supply](https://www.electroresales.com/hv-psu.html).
+My Nixie Tube clock is driven by a ATMega328P _(the same MCU used in an Arduino Uno)_, four IN-14 Nixie Tubes, an IN-3 neon lamp, and a DS3231 RTC clock module. The tubes are powered by a high power [AC to DC supply](https://www.electroresales.com/hv-psu.html).
 
 ## Schematics
 
