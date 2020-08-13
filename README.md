@@ -20,13 +20,18 @@ I'm using the following parts in my project:
 * 1 x DS3231 Real Time Clock Module [eBay](https://www.ebay.co.uk/sch/i.html?_from=R40&_trksid=m570.l1313&_nkw=ds3231&_sacat=0)
 * 4 x 74141 (К155ИД1) Nixie Drivers
 * 2 x 74HC595N Shift Registers
-* 2 x 22pF Capacitors
-* 1 x 16MHz Crystal
-* 1 x Stepdown switch regulator,LM2575T-5 2.2A
-* 1 x Schottky barrier diode,1N58191A 40V
-* 1 x Inductor radial ELC08D 330uH
-* 1 x Al Electrolytic Cap 105C 16V 330uF
-* 1 x M radial Al elect cap,100uF 16V 85deg C
+* 2 x 22pF Capacitors _(for ATmega)_
+* 1 x 16MHz Crystal _(for ATmega)_
+* 2 x Momentary switches _(for set and increment controls)_
+* 1 x DC barrel jack _(for power to HV supply and 12V stepdown circuit)_
+* 6 x 10k resistors _(for switches and IN-14s)_
+* 1 x 100k resistor _(for IN-3)_
+* 1 x 22k resistor _(for IN-3)_
+* 1 x Stepdown switch regulator,LM2575T-5 2.2A _(for 12V to 5V stepdown circuit)_
+* 1 x Schottky barrier diode,1N58191A 40V _(for 12V to 5V stepdown circuit)_
+* 1 x Inductor radial ELC08D 330uH _(for 12V to 5V stepdown circuit)_
+* 1 x Al Electrolytic Cap 105C 16V 330uF _(for 12V to 5V stepdown circuit)_
+* 1 x M radial Al elect cap,100uF 16V 85deg C _(for 12V to 5V stepdown circuit)_
 
 ## Todo
 
