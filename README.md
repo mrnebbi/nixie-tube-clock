@@ -8,6 +8,7 @@ My Nixie Tube clock is driven by a ATMega328P _(the same MCU used in an Arduino 
 ## Schematics
 
 [Main board](https://github.com/mrnebbi/nixie-tube-clock/raw/master/Eagle/Nixie%20schematic.pdf) - The main circuit board layout is mostly included in the Eagle schematic, but a few additions need to be added to the files.
+
 [HV supply](https://github.com/mrnebbi/nixie-tube-clock/raw/master/docs/hv-supply.pdf) - The clock uses an off the shelf high voltage board to step the 12V up to the ~170V needed for the nixie tubes.
 
 ## Parts ##
